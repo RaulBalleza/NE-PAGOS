@@ -1,0 +1,29 @@
+{{extend 'layout.html'}}
+<h1>Nuevo pago</h1>
+<div class="container">
+    <form action="{{=URL(vars=dict(alumno_id=alumno_id,new=1))}}" class="web2py_form" enctype="multipart/form-data"
+        method="post">
+        <div class="form-group row" id="t_pagos_f_alumno__row"><label class="form-control-label col-sm-3"
+                for="t_pagos_f_alumno" id="t_pagos_f_alumno__label">Alumno</label>
+            <div class="col-sm-9"><select class="form-control generic-widget" id="t_pagos_f_alumno" name="f_alumno">
+                    <option value="{{=alumno_id}}">{{=alumno_name}}</option>
+                </select><span class="help-block"></span></div>
+        </div>
+        <div class="form-group row" id="t_pagos_f_proceso__row"><label class="form-control-label col-sm-3"
+                for="t_pagos_f_proceso" id="t_pagos_f_proceso__label">Proceso</label>
+            <div class="col-sm-9"><select class="form-control generic-widget" id="t_pagos_f_proceso" name="f_proceso">
+                    {{for option in db(db.t_procesos.id >0).select(db.t_procesos.ALL):}}
+                    <option value="{{=option.id}}">{{=option.f_name}} - ${{=option.f_amount}}</option>
+                    {{pass}}
+                </select><span class="help-block"></span></div>
+        </div>
+        <div class="form-group row" id="t_pagos_f_amount__row"><label class="form-control-label col-sm-3"
+                for="t_pagos_f_amount" id="t_pagos_f_amount__label">Amount</label>
+            <div class="col-sm-9"><input class="double form-control" id="t_pagos_f_amount" name="f_amount" type="text"
+                    value=""><span class="help-block"></span></div>
+        </div>
+        <div class="form-group row" id="submit_record__row">
+            <div class="col-sm-9 col-sm-offset-3"><input class="btn btn-primary" type="submit" value="Enviar"></div>
+        </div>
+    </form>
+</div>

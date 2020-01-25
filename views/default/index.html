@@ -1,0 +1,105 @@
+{{extend 'layout.html'}}
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+
+    // Load the Visualization API and the corechart package.
+    google.charts.load('current', { 'packages': ['corechart'] });
+
+    // Set a callback to run when the Google Visualization API is loaded.
+    google.charts.setOnLoadCallback(drawChart);
+
+    // Callback that creates and populates a data table,
+    // instantiates the pie chart, passes in the data and
+    // draws it.
+    function drawChart() {
+
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Topping');
+        data.addColumn('number', 'Slices');
+        data.addRows([
+            ['Pagado', {{=pagados }}],
+    ['Pendiente', {{=pendientes }}]
+        ]);
+
+    // Set chart options
+    var options = {
+        'title': 'Pago de inscripcion de alumnos',
+        'width': 400,
+        'height': 300
+    };
+
+    // Instantiate and draw our chart, passing in some options.
+    var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+    chart.draw(data, options);
+    }
+</script>
+<div class="row">
+    <div class="col-4">
+        <h1>Gráficas de pagos.</h1>
+    </div>
+    <div class="col-8 text-right">
+        <form action="{{=URL()}}" class="form-inline">
+            <div class="form-group mx-sm-3">
+                <label for="fecha_inicio">Fecha de inicio: </label>
+                <input class="form-control" type="date" name="fecha_inicio" id="fecha_inicio">
+            </div>
+            <div class="form-group mx-sm-3">
+                <label for="fecha_fin">Fecha de fin: </label>
+                <input class="form-control" type="date" name="fecha_fin" id="fecha_fin">
+            </div>
+            <input type="text" name="reporte" hidden value="1">
+            <button type="submit" class="btn btn-primary">Generar reporte</button>
+        </form>
+    </div>
+</div>
+<div class="row">
+    {{if reporte:}}
+
+    <div class="col-8">
+        <h2>Reporte de inscripciones</h2>
+        {{rows = db((db.t_grupos.id > 0)).select(db.t_grupos.ALL)}}
+        {{amount = db((db.t_alumnos.id > 0)).select(db.t_alumnos.id,
+            db.t_alumnos.f_grupo, 
+            groupby='f_grupo')}}
+        {{pagos = db((db.t_pagos.f_date >= fecha_inicio)
+        & (db.t_pagos.f_date <= fecha_fin)).select(db.t_pagos.ALL)}}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Recaudado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{precio = 0}}
+                {{for row in pagos:}}
+                <tr>
+                    <th scope="row">{{=row.id}}</th>
+                    {{nombre = db(db.t_procesos.id == row.f_proceso).select(db.t_procesos.f_name)}}
+                    {{for xd in nombre:}}
+                    <td>{{=xd.f_name}}</td>
+                    {{pass}}
+                    <td>{{=row.f_amount}}</td>
+                    {{precio = precio+row.f_amount}}
+                    {{pass}}
+                </tr>
+                <tr>
+                    <td></td>
+                    <th>Total:</th>
+                    <td>{{=precio}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-4">
+        <div id="chart_div"></div>
+    </div>
+    {{else:}}
+    <div class="container">
+        <div id="chart_div"></div>
+    </div>
+    {{pass}}
+</div>
